@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Х'Арийская арифметика для детей</title>
+<style>
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background-color: #f0f4f8;
+color: #1a202c;
+padding: 20px;
+margin: 0;
+}
+.container {
+max-width: 800px;
+margin: 0 auto;
+}
+h1, h2 {
+text-align: center;
+color: #2b6cb0;
+}
+/* Стили для адаптивной таблицы */
+.table-responsive {
+width: 100%;
+margin-top: 20px;
+}
+.crypto-table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+border-radius: 8px;
+overflow: hidden;
+box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.crypto-table th {
+background-color: #2b6cb0;
+color: white;
+padding: 15px;
+font-size: 1.1em;
+}
+.crypto-table td {
+padding: 15px;
+text-align: center;
+border-bottom: 1px solid #e2e8f0;
+font-size: 1.2em;
+}
+.crypto-table tr:hover {
+background-color: #f7fafc;
+}
+/* Мобильная адаптивность: превращаем таблицу в карточки */
+@media screen and (max-width: 600px) {
+.crypto-table thead {
+display: none;
+}
+.crypto-table, .crypto-table tbody, .crypto-table tr, .crypto-table td {
+display: block;
+width: 100%;
+}
+.crypto-table tr {
+background: white;
+margin-bottom: 15px;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+padding: 10px 0;
+}
+.crypto-table td {
+text-align: left;
+padding: 8px 20px;
+border: none;
+}
+.crypto-table td:nth-of-type(1):before { content: "Выражение: "; font-weight: bold; color: #4a5568; }
+.crypto-table td:nth-of-type(2):before { content: "Образ: "; font-weight: bold; color: #4a5568; }
+.crypto-table td:nth-of-type(3):before { content: "Результат: "; font-weight: bold; color: #4a5568; }
+}
+</style>
+</head>
+<body>
+<div class="tabs-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px;">
+    <button class="tab-btn active" style="padding: 10px 20px; font-size: 1em; border: none; border-radius: 5px; background-color: #2b6cb0; color: white; cursor: pointer; font-weight: bold;">Триадная</button>
+    <button class="tab-btn" style="padding: 10px 20px; font-size: 1em; border: 1px solid #2b6cb0; border-radius: 5px; background-color: white; color: #2b6cb0; cursor: pointer;">Гармоническая</button>
+    <button class="tab-btn" style="padding: 10px 20px; font-size: 1em; border: 1px solid #2b6cb0; border-radius: 5px; background-color: white; color: #2b6cb0; cursor: pointer;">Ровная</button>
+    <button class="tab-btn" style="padding: 10px 20px; font-size: 1em; border: 1px solid #2b6cb0; border-radius: 5px; background-color: white; color: #2b6cb0; cursor: pointer;">Пирамидальная</button>
+    <button class="tab-btn" style="padding: 10px 20px; font-size: 1em; border: 1px solid #2b6cb0; border-radius: 5px; background-color: white; color: #2b6cb0; cursor: pointer;">Призменная</button>
+</div>
+<div class="container">
+<h1>Х`Арийская арифметика</h1>
+<h2>Двухмерное триадное умножение (Пример)</h2>
+<div class="table-responsive">
+<table class="crypto-table">
+<thead>
+<tr>
+<th>Выражение</th>
+<th>Соответствие (Образ)</th>
+<th>Результат (Мерные точки)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3<sub>-1</sub> &middot; 5</td>
+<td>&equiv; 3<sub>-1</sub><sup>5</sup></td>
+<td>15</td>
+</tr>
+<tr>
+<td>3<sub>-1</sub> &middot; 6</td>
+<td>&equiv; 3<sub>-1</sub><sup>6</sup></td>
+<td>21</td>
+</tr>
+<tr>
+<td>3<sub>-1</sub> &middot; 7</td>
+<td>&equiv; 3<sub>-1</sub><sup>7</sup></td>
+<td>28</td>
+</tr>
+<tr>
+<td>3<sub>-1</sub> &middot; 8</td>
+<td>&equiv; 3<sub>-1</sub><sup>8</sup></td>
+<td>36</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<script>
+const systemsData = {
+    'Триадная': {
+        title: 'Двухмерное триадное умножение (Пример)',
+        rows: [
+            ['3<sub>-1</sub> &middot; 5', '&equiv; 3<sub>-1</sub><sup>5</sup>', '15'],
+            ['3<sub>-1</sub> &middot; 6', '&equiv; 3<sub>-1</sub><sup>6</sup>', '21'],
+            ['3<sub>-1</sub> &middot; 7', '&equiv; 3<sub>-1</sub><sup>7</sup>', '28'],
+            ['3<sub>-1</sub> &middot; 8', '&equiv; 3<sub>-1</sub><sup>8</sup>', '36']
+        ]
+    },
+    'Гармоническая': {
+        title: 'Гармоническая система умножения',
+        rows: [
+            ['1 &middot; 1', '&equiv; 1<sup>1</sup>', '1'],
+            ['2 &middot; 2', '&equiv; 2<sup>2</sup>', '4'],
+            ['3 &middot; 3', '&equiv; 3<sup>3</sup>', '9']
+        ]
+    },
+    'Ровная': {
+        title: 'Ровная система умножения',
+        rows: [
+            ['2 &middot; 2', '&equiv; 4', '4'],
+            ['4 &middot; 4', '&equiv; 16', '16']
+        ]
+    },
+    'Пирамидальная': {
+        title: 'Пирамидальная система умножения',
+        rows: [
+            ['3 &middot; 3', '&equiv; Пирамида 3', '14'],
+            ['4 &middot; 4', '&equiv; Пирамида 4', '30']
+        ]
+    },
+    'Призменная': {
+        title: 'Призменная система умножения',
+        rows: [
+            ['5 &middot; 5', '&equiv; Призма 5', '50'],
+            ['6 &middot; 6', '&equiv; Призма 6', '72']
+        ]
+    }
+};
+
+const buttons = document.querySelectorAll('.tab-btn');
+const tableTitle = document.querySelector('h2');
+const tableBody = document.querySelector('.crypto-table tbody');
+
+buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        buttons.forEach(b => {
+            b.classList.remove('active');
+            b.style.backgroundColor = 'white';
+            b.style.color = '#2b6cb0';
+            b.style.fontWeight = 'normal';
+            b.style.border = '1px solid #2b6cb0';
+        });
+
+        btn.classList.add('active');
+        btn.style.backgroundColor = '#2b6cb0';
+        btn.style.color = 'white';
+        btn.style.fontWeight = 'bold';
+        btn.style.border = 'none';
+
+        const systemName = btn.textContent.trim();
+        const data = systemsData[systemName];
+
+        if (data) {
+            tableTitle.textContent = data.title;
+            tableBody.innerHTML = '';
+            data.rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td>`;
+                tableBody.appendChild(tr);
+            });
+        }
+    });
+});
+</script>
+</body>
+</html>

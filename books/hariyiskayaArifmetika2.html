@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Х'Арийская арифметика для детей</title>
+<style>
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background-color: #f0f4f8;
+color: #1a202c;
+padding: 20px;
+margin: 0;
+}
+.container {
+max-width: 850px;
+margin: 0 auto;
+}
+h1, h2 {
+text-align: center;
+color: #2b6cb0;
+}
+.tabs-container {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+justify-content: center;
+margin-bottom: 20px;
+}
+.table-responsive {
+width: 100%;
+margin-top: 20px;
+}
+.crypto-table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+border-radius: 8px;
+overflow: hidden;
+box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.crypto-table th {
+background-color: #2b6cb0;
+color: white;
+padding: 15px;
+font-size: 1.1em;
+}
+.crypto-table td {
+padding: 12px;
+text-align: center;
+border-bottom: 1px solid #e2e8f0;
+font-size: 1.1em;
+}
+.crypto-table tr:hover {
+background-color: #f7fafc;
+}
+@media screen and (max-width: 600px) {
+.crypto-table thead {
+display: none;
+}
+.crypto-table, .crypto-table tbody, .crypto-table tr, .crypto-table td {
+display: block;
+width: 100%;
+}
+.crypto-table tr {
+background: white;
+margin-bottom: 15px;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+padding: 10px 0;
+}
+.crypto-table td {
+text-align: left;
+padding: 8px 20px;
+border: none;
+}
+.crypto-table td:nth-of-type(1):before { content: "Выражение: "; font-weight: bold; color: #4a5568; }
+.crypto-table td:nth-of-type(2):before { content: "Соответствие (Образ): "; font-weight: bold; color: #4a5568; }
+.crypto-table td:nth-of-type(3):before { content: "Мерные точки: "; font-weight: bold; color: #4a5568; }
+}
+</style>
+</head>
+<body>
+<div class="tabs-container">
+    <button class="tab-btn active" onclick="switchSystem('Гармоническая')">Гармоническая</button>
+    <button class="tab-btn" onclick="switchSystem('Триадная')">Триадная</button>
+    <button class="tab-btn" onclick="switchSystem('Ровная')">Ровная</button>
+    <button class="tab-btn" onclick="switchSystem('Пирамидальная')">Пирамидальная</button>
+    <button class="tab-btn" onclick="switchSystem('Призменная')">Призменная</button>
+</div>
+<div class="container">
+    <h1>Х`Арийская арифметика</h1>
+    <h2 id="system-title">Гармоническая система умножения</h2>
+    <div class="table-responsive">
+        <table class="crypto-table">
+            <thead>
+                <tr>
+                    <th>Выражение</th>
+                    <th>Соответствие (Образ)</th>
+                    <th>Результат (Мерные точки)</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Сюда данные автоматически сгенерирует скрипт ниже -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// Автоматический генератор таблиц по точным формулам из листов книги
+function generateAllData() {
+    const data = {
+        'Гармоническая': { title: 'Гармоническая система («два на...» и «два жды...»)', rows: [] },
+        'Триадная': { title: 'Триадная система («на...» и «жды...»)', rows: [] },
+        'Ровная': { title: 'Ровная система («ровно на...» и «ровно жды...»)', rows: [] },
+        'Пирамидальная': { title: 'Система Пирамидального Умножения («пирамида жды...»)', rows: [] },
+        'Призменная': { title: 'Призменная система (Малая и Ровная призма жды...)', rows: [] }
+    };
+
+    // Генерируем ряды от 2 до 65 строго по таблицам из книги
+    for (let n = 2; n <= 65; n++) {
+        // 1. ГАРМОНИЧЕСКАЯ
+        data['Гармоническая'].rows.push([`2 &middot; ${n}`, `2<sub>-1</sub><sup>${n}</sup>`, `${2 * n}`]);
+        data['Гармоническая'].rows.push([`2 &times; ${n}`, `2<sub>-1</sub><sup>${n}</sup> (куб)`, `${2 * n * 4}`]);
+
+        // 2. ТРИАДНАЯ (Формулы треугольных и тетраэдрических чисел)
+        let tri2d = (n * (n + 1)) / 2;
+        let tri3d = (n * (n + 1) * (n + 2)) / 6;
+        data['Триадная'].rows.push([`3<sub>-1</sub> &middot; ${n}`, `3<sub>-1</sub><sup>${n}</sup>`, `${tri2d}`]);
+        data['Триадная'].rows.push([`3<sub>-1</sub> &times; ${n}`, `3<sub>-1</sub><sup>${n}</sup> (ЖДЫ)`, `${tri3d}`]);
+
+        // 3. РОВНАЯ (Квадраты и Кубы)
+        data['Ровная'].rows.push([`4<sub>-1</sub> &middot; ${n}`, `4<sub>-1</sub><sup>${n}</sup> (Плоская)`, `${n * n}`]);
+        data['Ровная'].rows.push([`4<sub>-1</sub> &times; ${n}`, `4<sub>-1</sub><sup>${n}</sup> (Объемная)`, `${n * n * n}`]);
+
+        // 4. ПИРАМИДАЛЬНАЯ (Сумма квадратов — Пирамида жды...)
+        let pyr = (n * (n + 1) * (2 * n + 1)) / 6;
+        data['Пирамидальная'].rows.push([`&Pi; &times; ${n}`, `&Pi;<sup>${n}</sup>`, `${pyr}`]);
+    }
+
+    // 5. ПРИЗМЕННАЯ (Малая П и Ровная R призма до 16 из листов 11, 13)
+    for (let n = 2; n <= 16; n++) {
+        let p_rows = n * 2 - 1;
+        let p_res = (n * (n + 1) * (2 * n + 1)) / 6; // Малая призма равна пирамиде по точкам
+        data['Призменная'].rows.push([`P &times; ${p_rows}`, `P<sup>${n}</sup> (Малая, ${n} основ)`, `${p_res}`]);
+    }
+    for (let n = 2; n <= 16; n++) {
+        let r_rows = n * 2 - 1;
+        let r_res = ((n * (n + 1) * (2 * n + 1)) / 6) + (((n-1) * n * (2 * (n-1) + 1)) / 6) + (n * n); // Ровная призма
+        data['Призменная'].rows.push([`R &times; ${r_rows}`, `R<sup>${n}</sup> (Ровная, ${n} основ)`, `${r_res}`]);
+    }
+
+    return data;
+}
+
+const systemsData = generateAllData();
+
+function switchSystem(name) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if(btn.textContent === name) {
+            btn.classList.add('active');
+            btn.style.backgroundColor = '#2b6cb0';
+            btn.style.color = 'white';
+        } else {
+            btn.classList.remove('active');
+            btn.style.backgroundColor = 'white';
+            btn.style.color = '#2b6cb0';
+        }
+    });
+
+    const data = systemsData[name];
+    document.getElementById('system-title').innerHTML = data.title;
+    
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+    
+    data.rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+// Стартовый запуск страницы
+switchSystem('Гармоническая');
+</script>
+</body>
+</html>

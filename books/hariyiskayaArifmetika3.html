@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Х'Арийская арифметика для детей</title>
+<style>
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background-color: #f0f4f8;
+color: #1a202c;
+padding: 20px;
+margin: 0;
+overflow-hidden;
+}
+h1 {
+text-align: center;
+color: #2b6cb0;
+margin-top: 0;
+margin-bottom: 15px;
+}
+.tabs-container {
+display: flex;
+gap: 10px;
+justify-content: center;
+margin-bottom: 15px;
+}
+.tab-btn {
+padding: 10px 20px;
+font-size: 1em;
+border: 1px solid #2b6cb0;
+border-radius: 5px;
+background-color: white;
+color: #2b6cb0;
+cursor: pointer;
+transition: all 0.2s;
+}
+.tab-btn.active {
+background-color: #2b6cb0;
+color: white;
+font-weight: bold;
+border: none;
+}
+/* Двухпанельный интерфейс для ПК */
+.main-workspace {
+display: flex;
+gap: 20px;
+max-width: 1400px;
+margin: 0 auto;
+height: calc(100vh - 120px);
+}
+/* Левая панель: Таблица */
+.left-panel {
+flex: 4;
+background: white;
+border-radius: 8px;
+padding: 15px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+overflow-y: auto;
+}
+/* Правая панель: Графика и Образы */
+.right-panel {
+flex: 6;
+background: white;
+border-radius: 8px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+h2 {
+color: #2b6cb0;
+margin: 0;
+font-size: 1.4em;
+}
+.crypto-table {
+width: 100%;
+border-collapse: collapse;
+}
+.crypto-table th {
+background-color: #2b6cb0;
+color: white;
+padding: 12px;
+font-size: 1em;
+position: sticky;
+top: 0;
+}
+.crypto-table td {
+padding: 12px;
+text-align: center;
+border-bottom: 1px solid #e2e8f0;
+font-size: 1.1em;
+cursor: pointer;
+}
+.crypto-table tr:hover {
+background-color: #f7fafc;
+}
+.crypto-table tr.selected-row {
+background-color: #ebf8ff;
+border-left: 4px solid #2b6cb0;
+}
+/* Холст для 3D-графики */
+.canvas-container {
+width: 100%;
+height: 350px;
+background: #2d3748;
+border-radius: 6px;
+position: relative;
+display: flex;
+justify-content: center;
+align-items: center;
+color: white;
+}
+/* Текстовое описание образа */
+.image-description {
+background: #f7fafc;
+border-left: 4px solid #4299e1;
+padding: 15px;
+border-radius: 4px;
+font-size: 1.1em;
+line-height: 1.5;
+flex-grow: 1;
+overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<h1>Х`Арийская арифметика</h1>
+
+<div class="tabs-container">
+    <button class="tab-btn active" onclick="switchSystem('Гармоническая')">Гармоническая</button>
+    <button class="tab-btn" onclick="switchSystem('Триадная')">Триадная</button>
+    <button class="tab-btn" onclick="switchSystem('Ровная')">Ровная</button>
+    <button class="tab-btn" onclick="switchSystem('Пирамидальная')">Пирамидальная</button>
+    <button class="tab-btn" onclick="switchSystem('Призменная')">Призменная</button>
+</div>
+
+<div class="main-workspace">
+    <!-- Левая панель с таблицей -->
+    <div class="left-panel">
+        <table class="crypto-table">
+            <thead>
+                <tr>
+                    <th>Выражение</th>
+                    <th>Соответствие</th>
+                    <th>Точки</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Заполняется автоматически -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Правая панель с живой графикой -->
+    <div class="right-panel">
+        <h2 id="system-title">Гармоническая система</h2>
+        <div class="canvas-container" id="canvas-zone">
+            <span>Здесь будет интерактивная 3D-фигура из шаров</span>
+        </div>
+        <div class="image-description" id="desc-zone">
+            Выберите любую строку в таблице слева, чтобы оживить образ системы и прочитать описание.
+        </div>
+    </div>
+</div>
+
+<script>
+const systemsData = {
+    'Гармоническая': {
+        title: 'Гармоническая система («два на...» и «два жды...»)',
+        rows: [
+            ['2 &middot; 2', '2<sub>-1</sub><sup>2</sup>', '4', 'Плоская структура «на...». Две мерные линии по две точки образуют плоский гармонический квадрат.'],
+            ['2 &middot; 16', '2<sub>-1</sub><sup>16</sup>', '32', 'Плоская структура «на...». Две мерные линии по 16 точек образуют вытянутый гармонический прямоугольник.'],
+            ['2 &times; 2', '2<sub>-1</sub><sup>2</sup> (объем)', '16', 'Объемная структура «жды...» (знак Х). Две плоскости по 2 точки в осях разворачиваются во времени, создавая объемную пространственную матрицу из 16 мерных точек.'],
+            ['2 &times; 16', '2<sub>-1</sub><sup>16</sup> (объем)', '128', 'Объемная пространственная структура «жды...». Шаг 16 дает глубокую мерную гармонику объема.']
+        ]
+    },
+    'Триадная': {
+        title: 'Триадная система умножения (\u0033\u20 Burlington...)',
+        rows: [
+            ['3<sub>-1</sub> &middot; 2', '&equiv; 3<sub>-1</sub><sup>2</sup> (2 ряда)', '3', 'Двухмерная Триада. 2 ряда шаров выстраивают базовый треугольник на плоскости.'],
+            ['3<sub>-1</sub> &middot; 3', '&equiv; 3<sub>-1</sub><sup>3</sup> (3 ряда)', '6', 'Двухмерная Триада. Треугольник из 3 рядов шаров (1 + 2 + 3 = 6 мерных точек).'],
+            ['3<sub>-1</sub> &middot; 4', '&equiv; 3<sub>-1</sub><sup>4</sup> (4 ряда)', '10', 'Двухмерная Триада. Четыре ряда шаров образуют плоскую треугольную структуру.'],
+            ['3<sub>-1</sub> &middot; 16', '&equiv; 3<sub>-1</sub><sup>16</sup>', '136', 'Полная плоская Триада из 16 рядов. Сумма всех точек от 1 до 16 дает ровно 136.'],
+            ['3<sub>-1</sub> &times; 2', '&equiv; 3<sub>-1</sub><sup>2</sup> (объем)', '4', 'Трехмерная Триада ЖДЫ. Четыре шара образуют простейший объемный тетраэдр (треугольную пирамиду).'],
+            ['3<sub>-1</sub> &times; 3', '&equiv; 3<sub>-1</sub><sup>3</sup> (объем)', '10', 'Объемная Триада из 3 слоев. На вершине 1 шар, под ним плоский слой из 3 шаров, в самом низу слой из 6 шаров. Всего 10 точек.'],
+            ['3<sub>-1</sub> &times; 16', '&equiv; 3<sub>-1</sub><sup>16</sup> (объем)', '816', 'Мощный объемный тетраэдр из 16 слоев шаров, содержащий в себе 816 мерных точек.']
+        ]
+    },
+    'Ровная': {
+        title: 'Ровная система умножения (Малая и Трехмерная)',
+        rows: [
+            ['4<sub>-1</sub> &middot; 2', '&equiv; 2 &middot; 2', '4', 'Малая Ровна. Идеальный квадрат со стороной в 2 шара.'],
+            ['4<sub>-1</sub> &middot; 3', '&equiv; 3 &middot; 3', '9', 'Малая Ровна. Квадратная плоскость из 9 мерных точек (сторона 3 шара).'],
+            ['4<sub>-1</sub> &middot; 16', '&equiv; 16 &middot; 16', '256', 'Малая Ровна. Квадратная матрица на плоскости из 256 шаров.'],
+            ['4<sub>-1</sub> &times; 2', '&equiv; 2 &times; |2|<sup>2</sup>', '8', 'Трехмерная Ровна. Идеальный куб из 8 шаров (2х2х2).'],
+            ['4<sub>-1</sub> &times; 3', '&equiv; 3 &times; |3|<sup>3</sup>', '27', 'Трехмерная Ровна. Правильный куб, состоящий из 27 мерных точек.'],
+            ['4<sub>-1</sub> &times; 16', '&equiv; 16 &times; |16|<sup>16</sup>', '4096', 'Гигантский объемный куб Ровной системы со стороной в 16 шаров. Итого 4096 точек.']
+        ]
+    },
+    'Пирамидальная': {
+        title: 'Система Пирамидального Умножения (&Pi; &times; n)',
+        rows: [
+            ['&Pi; &times; 2', '&equiv; &Pi;<sup>2</sup>', '5', 'Пирамида ЖДЫ из двух слоев. На вершине 1 шар, в основании квадрат из 4 шаров Малой Ровны. Всего 5 точек.'],
+            ['&Pi; &times; 3', '&equiv; &Pi;<sup>3</sup>', '14', 'Пирамида из 3 слоев. Вершина (1) + средний квадрат (4) + нижнее основание (9). Всего 14 мерных точек.'],
+            ['&Pi; &times; 4', '&equiv; &Pi;<sup>4</sup>', '30', 'Четырехслойная пирамида. К прошлым 14 точкам снизу подложили квадрат из 16 шаров. Получилось 30.'],
+            ['&Pi; &times; 16', '&equiv; &Pi;<sup>16</sup>', '1496', 'Финальная устойчивая пирамида из 16 слоев Ровной системы, вмещающая 1496 шаров.']
+        ]
+    },
+    'Призменная': {
+        title: 'Призменная система умножения (Малая и Ровная)',
+        rows: [
+            ['P &times; 3', '&equiv; P<sup>2</sup>', '5', 'Малая Призма из двух треугольных основ (по 1 шару) и 3 связующих рядов. Всего 5 точек.'],
+            ['P &times; 5', '&equiv; P<sup>3</sup>', '14', 'Малая Призма на 3 основы. Послойное сложение треугольников Триадной системы дает 14 точек.'],
+            ['P &times; 31', '&equiv; P<sup>16</sup>', '1496', 'Малая Призма на 16 основ. Количество мерных точек равно 1496, сходясь с результатом Пирамиды.'],
+            ['R &times; 3', '&equiv; R<sup>2</sup>', '6', 'Ровная Призма из двух квадратных основ и 3 рядов. Всего 6 мерных точек.'],
+            ['R &times; 5', '&equiv; R<sup>3</sup>', '19', 'Ровная Призма из 3 квадратных основ. Дает объемную структуру из 19 шаров.'],
+            ['R &times; 31', '&equiv; R<sup>16</sup>', '2736', 'Предельная Ровная Призма книги на 16 основ, содержащая 2736 мерных точек.']
+        ]
+    }
+};
+
+let currentSystem = 'Гармоническая';
+
+function switchSystem(name) {
+    currentSystem = name;
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent === name);
+    });
+
+    const data = systemsData[name];
+    document.getElementById('system-title').innerHTML = data.title;
+    
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+    
+    data.rows.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        tr.onclick = () => selectRow(index, tr, row);
+        tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td><strong>${row[2]}</strong></td>`;
+        tbody.appendChild(tr);
+    });
+    
+    // Автоматически выбираем первую строку при переключении вкладки
+    if (data.rows.length > 0) {
+        tbody.querySelector('tr').click();
+    }
+}
+
+function selectRow(index, trElement, rowData) {
+    // Снимаем выделение со всех строк
+    document.querySelectorAll('.crypto-table tr').forEach(r => r.classList.remove('selected-row'));
+    // Выделяем текущую строку
+    trElement.classList.add('selected-row');
+    
+    // Обновляем текст описания
+    document.getElementById('desc-zone').innerHTML = <strong>Формула выражения:
+    </strong> ${rowData[0]} <br> <strong>Мерный Образ:</strong> ${rowData[1]} <br>         <strong>Итого мерных точек:</strong> ${rowData[2]} <br><br> <strong>Суть Образа:
+    </strong> ${rowData[3]};
+            // Вызываем функцию отрисовки шаров
+        updateCanvasFigure(currentSystem, rowData, parseInt(rowData[2]));
+    });
+}
+
+function updateCanvasFigure(system, expression, points) {
+    const canvasZone = document.getElementById('canvas-zone');
+    canvasZone.innerHTML = `<span>[3D Модель для ${system}: ${expression} на ${points} точек]</span>`;
+}
+
+    // Стартовый запуск
+    switchSystem('Гармоническая');
+</script>
+</body>
+</html>
