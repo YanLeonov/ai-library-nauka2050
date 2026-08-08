@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Х`Арийская арифметика</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e5e7eb;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        
+        /* ИСПРАВЛЕНИЕ: Равномерный жесткий отступ под главным заголовком */
+        .app-title {
+            font-size: 46px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            text-align: center;
+            width: 100%;
+        }
+        
+        /* ИСПРАВЛЕНИЕ: Фиксированный отступ под подзаголовком */
+        .system-subtitle {
+            font-size: 28px;
+            color: #ef4444;
+            font-weight: bold;
+            margin: 0 0 30px 0;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .main-layout {
+            display: flex;
+            gap: 40px; 
+            align-items: flex-start;
+            justify-content: center;
+            margin-top: 0;
+            width: 100%;
+        }
+        
+        /* ИСПРАВЛЕНИЕ: Системные равномерные отступы (gap: 25px) между всеми строками внутри левой панели */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px; 
+            width: 580px; 
+            height: 580px; 
+            border: 2px solid #4b5563;
+            padding: 40px; 
+            background-color: #e0f2fe; 
+            box-sizing: border-box;
+        }
+        
+        .style-selector {
+            display: flex;
+            gap: 25px;
+            font-size: 20px; 
+            font-weight: bold;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+        }
+        .style-selector label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        /* ИСПРАВЛЕНИЕ: Фиксированный зазор (gap: 20px) между заголовком операции и ячейками */
+        .equation-block {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; 
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: auto; /* Мягко прижимает блок к общему низу без перекосов */
+        }
+
+        .left-panel-operation-title {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            color: #000000;
+            margin: 0;
+        }
+
+        .row-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            width: 100%;
+            margin: 0;
+        }
+        
+        .cell-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* Фиксированный зазор под ячейками до подписей */
+        .cell-label-bottom {
+            font-size: 22px;
+            font-weight: bold;
+            color: #000000;
+            margin-top: 10px;
+            height: 26px;
+            text-align: center;
+        }
+        
+        .eq-cell, .eq-sign {
+            width: 85px;
+            height: 85px;
+            font-size: 42px; 
+            text-align: center;
+            line-height: 81px;
+            border: 2px solid #4b5563;
+            background-color: #ffffff;
+            box-sizing: border-box;
+        }
+        .eq-cell.interactive {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .eq-cell.interactive:hover {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #fca5a5, #ef4444);
+            border-radius: 50%;
+            transform: scale(1.15);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+        .eq-cell.active-target {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #fca5a5, #ef4444);
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .sign-wrapper {
+            padding-top: 0px; 
+            box-sizing: border-box;
+        }
+        
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* ИСПРАВЛЕНИЕ: Ровные зазоры (gap: 25px) между заголовком мер, фигурами и нижним текстом */
+        .visual-panel-box {
+            border: 2px solid #4b5563;
+            background: #e0f2fe; 
+            width: 580px;
+            height: 580px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px; 
+            padding: 40px; 
+            box-sizing: border-box;
+        }
+        
+        .right-panel-measure-title {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            color: #000000;
+            margin: 0;
+        }
+        
+        /* Зона холста без лишних внешних отступов */
+        .interactive-canvas-area {
+            width: 100%;
+            height: 340px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        
+        .image-description-text {
+            font-size: 26px !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            color: #000000 !important;
+            margin: 0;
+            width: 100%;
+            line-height: 1.3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-layout">
+        <div class="control-panel">
+            
+            <div class="app-title" id="mainAppTitle">Х`Арийская арифметика</div>
+            <div class="system-subtitle" id="subSystemTitle">Триадное умножение "ЖДЫ"</div>
+
+            <div class="style-selector">
+                <label><input type="radio" name="langStyle" value="modern" checked onchange="handleStyleToggle('modern')"> <span id="labelModern">Современный стандарт</span></label>
+                <label><input type="radio" name="langStyle" value="slavic" onchange="handleStyleToggle('slavic')"> <span id="labelSlavic">Древне Славянский стиль</span></label>
+            </div>
+
+            <div class="equation-block">
+                <div id="panelTitleLeft" class="left-panel-operation-title">Плоскостное умножение "ЖДЫ"</div>
+
+                <div class="row-container">
+                    <div class="cell-wrapper">
+                        <div class="eq-cell interactive" id="cellN1" onclick="handleElementClick('n1')">1</div>
+                        <div class="cell-label-bottom" id="labelN1Bottom"></div>
+                    </div>
+                    
+                    <div class="sign-wrapper">
+                        <div class="eq-sign" id="cellOp">×</div>
+                    </div>
+                    
+                    <div class="cell-wrapper">
+                        <div class="eq-cell interactive" id="cellN2" onclick="handleElementClick('n2')">1</div>
+                        <div class="cell-label-bottom" id="labelN2Bottom"></div>
+                    </div>
+                    
+                    <div class="sign-wrapper">
+                        <div class="eq-sign">=</div>
+                    </div>
+                    
+                    <div class="cell-wrapper">
+                        <div class="eq-cell interactive" id="cellRes" onclick="handleElementClick('res')" style="font-weight: bold;">9</div>
+                        <div class="cell-label-bottom" id="labelResBottom"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="visual-panel-box">
+                <div id="panelTitleRight" class="right-panel-measure-title">одна мера</div>
+                
+                <div class="interactive-canvas-area" id="canvasDisplayNode"></div>
+                
+                <div class="image-description-text" id="panelDescriptionText">
+                    Раскрытие одной меры в плоскость 3х3 (9 структур)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let activeLanguage = 'modern';
+        let selectedElement = 'res'; 
+
+        const translationMatrix = {
+            modern: {
+                mainTitle: 'Х`Арийская арифметика',
+                subTitle: 'Триадное умножение "ЖДЫ"',
+                labelModern: 'Современный стандарт',
+                labelSlavic: 'Древне Славянский стиль',
+                titleFlatLeft: 'Плоскостное умножение "ЖДЫ"', 
+                titleFlatRight: 'одна мера',                  
+                descSingle: 'Единичная мера (структурная плотность)',
+                descMatrix: 'Раскрытие одной меры в плоскость 3х3 (9 структур)',
+                val1: '1', val2: '1', valRes: '9',
+                lbl1Bot: '', lbl2Bot: '', lblResBot: ''
+            },
+            slavic: {
+                mainTitle: 'Х`Ариіская ариѳметика', 
+                subTitle: 'Тріадное умноженіе "ЖДЫ"', 
+                labelModern: 'Соврѣменный стандартъ',
+                labelSlavic: 'Дрѣвлѣ-славянскiй стиль',
+                titleFlatLeft: 'Плоскостное умноженіе "ЖДЫ"', 
+                titleFlatRight: 'едина мера',                  
+                descSingle: 'Единичная мѣра (структурная плотность)',
+                descMatrix: 'Раскрытіе одной мѣры въ плоскость 3х3 (9 структуръ)',
+                val1: 'a', val2: 'a', valRes: 'ѳ',
+                lbl1Bot: 'Азъ', lbl2Bot: 'Азъ', lblResBot: 'Фита'
+            }
+        };
+
+        function handleStyleToggle(style) {
+            activeLanguage = style;
+            syncInterfaceText();
+            renderEngine();
+        }
+
+        function handleElementClick(elementId) {
+            selectedElement = elementId;
+            document.getElementById('cellN1').classList.toggle('active-target', elementId === 'n1');
+            document.getElementById('cellN2').classList.toggle('active-target', elementId === 'n2');
+            document.getElementById('cellRes').classList.toggle('active-target', elementId === 'res');
+            syncInterfaceText();
+            renderEngine();
+        }
+
+        function syncInterfaceText() {
+            const dictionary = translationMatrix[activeLanguage];
+            document.getElementById('mainAppTitle').innerText = dictionary.mainTitle;
+            document.getElementById('subSystemTitle').innerText = dictionary.subTitle;
+            document.getElementById('labelModern').innerText = dictionary.labelModern;
+            document.getElementById('labelSlavic').innerText = dictionary.labelSlavic;
+            
+            document.getElementById('cellN1').innerText = dictionary.val1;
+            document.getElementById('cellN2').innerText = dictionary.val2;
+            document.getElementById('cellRes').innerText = dictionary.valRes;
+            
+            document.getElementById('labelN1Bottom').innerText = dictionary.lbl1Bot;
+            document.getElementById('labelN2Bottom').innerText = dictionary.lbl2Bot;
+            document.getElementById('labelResBottom').innerText = dictionary.lblResBot;
+            
+            document.getElementById('panelTitleLeft').innerText = dictionary.titleFlatLeft;
+            document.getElementById('panelTitleRight').innerText = dictionary.titleFlatRight;
+            
+            document.getElementById('panelDescriptionText').innerText = (selectedElement === 'n1' || selectedElement === 'n2') ? dictionary.descSingle : dictionary.descMatrix;
+        }
+
+        function renderEngine() {
+            const container = document.getElementById('canvasDisplayNode');
+            container.innerHTML = '';
+            
+            const canvas = document.createElement('canvas');
+            // Оптимальный размер холста под равномерный шаг gap
+            canvas.width = 500;
+            canvas.height = 340;
+            container.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+
+            let mouseX = canvas.width / 2;
+            let mouseY = canvas.height / 2;
+
+            let spheres = [];
+            const isSingle = (selectedElement === 'n1' || selectedElement === 'n2');
+
+            if (isSingle) {
+                spheres.push({ x: canvas.width / 2, y: canvas.height / 2, r: 110 });
+            } else {
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+                
+                const startX = cx - 100;
+                const startY = cy - 100;
+                for(let r=0; r<3; r++) {
+                    for(let c=0; c<3; c++) {
+                        spheres.push({ x: startX + c*100, y: startY + r*100, r: 50 });
+                    }
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                spheres.forEach(s => {
+                    let dx = mouseX - s.x;
+                    let dy = mouseY - s.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+                    
+                    let fx = s.x + (dx / dist) * (s.r * 0.4);
+                    let fy = s.y + (dy / dist) * (s.r * 0.4);
+
+                    let grad = ctx.createRadialGradient(fx, fy, s.r * 0.05, s.x, s.y, s.r);
+                    grad.addColorStop(0, '#ffffff');
+                    grad.addColorStop(0.2, '#fca5a5');
+                    grad.addColorStop(1, '#ef4444');
+
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+                    ctx.closePath();
+                });
+            }
+
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+                draw();
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                mouseX = canvas.width / 2;
+                mouseY = canvas.height / 2;
+                draw();
+            });
+
+            draw();
+        }
+
+        syncInterfaceText();
+        handleElementClick('res');
+    </script>
+</body>
+</html>
