@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Х`Арийская арифметика</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; }
+        /* ИСПРАВЛЕНИЕ: Выровняли базовый размер цифр в таблице для обоих стилей */
+        table { border-collapse: collapse; margin-bottom: 20px; background: white; }
+        td { border: 1px solid #ccc; padding: 15px; text-align: center; font-size: 34px; width: 60px; height: 60px; transition: font-family 0.3s ease; }
+        
+        .ball-cell {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .ball-cell:hover {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #fca5a5, #ef4444);
+            border-radius: 50%;
+            transform: scale(1.15);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+            z-index: 10;
+            border-color: transparent;
+        }
+        
+        .font-selector-panel {
+            background: white;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 20px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .font-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .font-option input {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .ancient-slavic-style {
+            font-family: "Times New Roman", Georgia, serif !important;
+            font-style: normal !important; 
+            font-size: 34px !important; 
+        }
+        /* ИСПРАВЛЕНИЕ: Закрепили одинаковый крупный размер 23px для текстовых зон обоих стилей */
+        div.canvas-title, div.canvas-footer, div.ancient-slavic-style, button.ancient-slavic-style {
+            font-style: normal !important; 
+            font-size: 23px !important; 
+            line-height: 1.3;
+        }
+
+        .controls-panel {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-mode {
+            padding: 10px 22px; 
+            font-size: 23px; /* Кнопки тоже подтянули к общему крупному масштабу */
+            cursor: pointer;
+            border: 1px solid #888;
+            background: #fff;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: font-family 0.3s ease;
+        }
+        .btn-mode.active {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+        }
+        #canvas3d-container {
+            width: 400px;
+            height: 400px;
+            border: 2px dashed #888;
+            background: #e0f2fe; 
+            position: relative;
+        }
+        .canvas-title {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: #000000;
+            pointer-events: none;
+            user-select: none;
+            z-index: 20;
+        }
+        .canvas-footer {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: #000000;
+            pointer-events: none;
+            user-select: none;
+            z-index: 20;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+    <h1 id="main-header">Х`Арийская арифметика</h1>
+
+    <div class="font-selector-panel">
+        <label class="font-option">
+            <input type="radio" name="fontStyle" id="modern-font" checked>
+            <span>Современный стандартъ</span>
+        </label>
+        <label class="font-option">
+            <input type="radio" name="fontStyle" id="slavic-font">
+            <span>Дрѣвлѣ-славѧнскоі стиль</span>
+        </label>
+    </div>
+
+    <table id="math-table">
+        <tr>
+            <td class="ball-cell" data-type="single">1</td>
+            <td id="math-sign">×</td>
+            <td class="ball-cell" data-type="single">1</td>
+            <td>=</td>
+            <td class="ball-cell" data-type="flat_grid9">9</td>
+        </tr>
+    </table>
+
+    <div class="controls-panel">
+        <button id="mode-light" class="btn-mode active">Плоскостной вид</button>
+        <button id="mode-figure" class="btn-mode">Вид в объеме</button>
+    </div>
+    
+    <div id="canvas3d-container">
+        <div class="canvas-title" id="display-title">Плоскостное умножение "ЖДЫ"</div>
+        <canvas id="localCanvas" width="400" height="400"></canvas>
+        <div class="canvas-footer" id="display-footer">Раскрытие одной меры в плоскость 3х3 (9 структур)</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('localCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false; 
+        let currentMode = 'single'; 
+        let userInteractionMode = 'light'; 
+        
+        let offsetX = 0; let offsetY = 0;
+        let angleX = 0;  let angleY = 0;
+
+        const flatGrid9Balls = [];
+        const stepFlat = 54; 
+        for (let x = -1; x <= 1; x++) {
+            for (let y = -1; y <= 1; y++) {
+                flatGrid9Balls.push({ x: x * stepFlat, y: y * stepFlat, z: 0, r: 28 });
+            }
+        }
+
+        const initialBalls3D = {
+            single: [{ x: 0, y: 0, z: 0, r: 120 }],
+            flat_grid9: flatGrid9Balls
+        };
+
+        let screenBalls = [];
+
+        function drawSingleBall(cX, cY, radius) {
+            let lightX = cX + offsetX;
+            let lightY = cY + offsetY;
+
+            let gradient = ctx.createRadialGradient(lightX, lightY, 2, cX, cY, radius);
+            gradient.addColorStop(0, '#ffffff');   
+            gradient.addColorStop(0.3, '#f87171'); 
+            gradient.addColorStop(0.8, '#991b1b'); 
+            gradient.addColorStop(1, '#450a0a');   
+            
+            ctx.beginPath();
+            ctx.arc(cX, cY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        }
+
+        function renderScene() {
+            ctx.clearRect(0, 0, 400, 400);
+            if (!isDrawing) return;
+
+            const baseBalls = initialBalls3D[currentMode];
+            screenBalls = [];
+
+            baseBalls.forEach(ball => {
+                let x1 = ball.x * Math.cos(angleX) - ball.z * Math.sin(angleX);
+                let z1 = ball.x * Math.sin(angleX) + ball.z * Math.cos(angleX);
+                
+                let y2 = ball.y * Math.cos(angleY) - z1 * Math.sin(angleY);
+                let z2 = ball.y * Math.sin(angleY) + z1 * Math.cos(angleY);
+
+                screenBalls.push({ x: x1 + 200, y: y2 + 200, z: z2, r: ball.r });
+            });
+
+            screenBalls.sort((a, b) => a.z - b.z);
+            screenBalls.forEach(ball => { drawSingleBall(ball.x, ball.y, ball.r); });
+        }
+
+        function isInsideAnyBall(mouseX, mouseY) {
+            for (let ball of screenBalls) {
+                const dx = mouseX - ball.x;
+                const dy = mouseY - ball.y;
+                if (Math.sqrt(dx * dx + dy * dy) <= ball.r) return true;
+            }
+            return false;
+        }
+
+        const table = document.getElementById('math-table');
+        const mainHeader = document.getElementById('main-header');
+        const displayTitle = document.getElementById('display-title');
+        const displayFooter = document.getElementById('display-footer');
+        const btnLight = document.getElementById('mode-light');
+        const btnFigure = document.getElementById('mode-figure');
+
+        function updatePageStyle(isSlavic) {
+            if (isSlavic) {
+                table.classList.add('ancient-slavic-style');
+                mainHeader.classList.add('ancient-slavic-style');
+                displayTitle.classList.add('ancient-slavic-style');
+                displayFooter.classList.add('ancient-slavic-style');
+                btnLight.classList.add('ancient-slavic-style');
+                btnFigure.classList.add('ancient-slavic-style');
+                
+                mainHeader.innerText = 'Х`Арийская арифметика';
+                btnLight.innerText = 'Плоскостной видъ';
+                btnFigure.innerText = 'Видъ въ объёмѣ';
+
+                if (currentMode === 'single' || currentMode === 'flat_grid9') {
+                    displayTitle.innerText = 'Плоскостное умноженіе "ЖДЫ"';
+                    displayFooter.innerText = 'Раскрытіе одной мѣры въ плоскость 3х3 (9 структуръ)';
+                } else {
+                    displayTitle.innerText = 'Объёмное умноженіе "Ю"';
+                    displayFooter.innerText = 'Раскрытіе мѣрности во всѣ стороны пространства';
+                }
+            } else {
+                table.classList.remove('ancient-slavic-style');
+                mainHeader.classList.remove('ancient-slavic-style');
+                displayTitle.classList.remove('ancient-slavic-style');
+                displayFooter.classList.remove('ancient-slavic-style');
+                btnLight.classList.remove('ancient-slavic-style');
+                btnFigure.classList.remove('ancient-slavic-style');
+                
+                mainHeader.innerText = 'Х`Арийская арифметика';
+                btnLight.innerText = 'Плоскостной вид';
+                btnFigure.innerText = 'Вид в объеме';
+
+                if (currentMode === 'single' || currentMode === 'flat_grid9') {
+                    displayTitle.innerText = 'Плоскостное умножение "ЖДЫ"';
+                    displayFooter.innerText = 'Раскрытие одной меры в плоскость 3х3 (9 структур)';
+                } else {
+                    displayTitle.innerText = 'Объёмное умножение "Ю"';
+                    displayFooter.innerText = 'Раскрытие мерности во все стороны пространства';
+                }
+            }
+        }
+
+        document.getElementById('modern-font').addEventListener('change', () => {
+            updatePageStyle(false);
+        });
+        document.getElementById('slavic-font').addEventListener('change', () => {
+            updatePageStyle(true);
+        });
+
+        btnLight.addEventListener('click', () => {
+            userInteractionMode = 'light';
+            btnLight.classList.add('active');
+            btnFigure.classList.remove('active');
+            angleX = 0; angleY = 0;
+            renderScene();
+        });
+        
+        btnFigure.addEventListener('click', () => {
+            userInteractionMode = 'figure';
+            btnFigure.classList.add('active');
+            btnLight.classList.remove('active');
+        });
+
+        document.querySelectorAll('.ball-cell').forEach(cell => {
+            cell.addEventListener('click', (e) => {
+                isDrawing = true;
+                currentMode = e.target.getAttribute('data-type');
+                angleX = 0; angleY = 0;
+                offsetX = 0; offsetY = 0;
+                
+                const isSlavicActive = document.getElementById('slavic-font').checked;
+                if (currentMode === 'single' || currentMode === 'flat_grid9') {
+                    document.getElementById('math-sign').innerText = '×';
+                    displayTitle.innerText = isSlavicActive ? 'Плоскостное умноженіе "ЖДЫ"' : 'Плоскостное умножение "ЖДЫ"';
+                    displayFooter.innerText = isSlavicActive ? 'Раскрытіе одной мѣры въ плоскость 3х3 (9 структуръ)' : 'Раскрытие одной меры в плоскость 3х3 (9 структур)';
+                } else {
+                    document.getElementById('math-sign').innerText = '·';
+                    displayTitle.innerText = isSlavicActive ? 'Объёмное умноженіе "Ю"' : 'Объёмное умножение "Ю"';
+                    displayFooter.innerText = isSlavicActive ? 'Раскрытіе мѣрности во всѣ стороны пространства' : 'Раскрытие мерности во все стороны пространства';
+                }
+                
+                renderScene();
+            });
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            if (!isInsideAnyBall(clickX, clickY)) return;
+
+            canvas.style.cursor = 'grabbing';
+            let startX = e.clientX;
+            let startY = e.clientY;
+            
+            let baseOffsetX = offsetX;
+            let baseOffsetY = offsetY;
+            let baseAngleX = angleX;
+            let baseAngleY = angleY;
+            
+            function move(me) {
+                const currentX = me.clientX - rect.left;
+                const currentY = me.clientY - rect.top;
+
+                if (!isInsideAnyBall(currentX, currentY)) {
+                    up();
+                    return;
+                }
+
+                let activeInteractionMode = (currentMode === 'single') ? 'light' : userInteractionMode;
+
+                if (activeInteractionMode === 'light') {
+                    let targetOffsetX = baseOffsetX + (me.clientX - startX) * 0.5;
+                    let targetOffsetY = baseOffsetY + (me.clientY - startY) * 0.5;
+                    
+                    let distance = Math.sqrt(targetOffsetX * targetOffsetX + targetOffsetY * targetOffsetY);
+                    let maxRadiusLimit = (currentMode === 'single') ? 95 : 16; 
+                    
+                    if (distance <= maxRadiusLimit) {
+                        offsetX = targetOffsetX;
+                        offsetY = targetOffsetY;
+                    } else {
+                        offsetX = (targetOffsetX / distance) * maxRadiusLimit;
+                        offsetY = (targetOffsetY / distance) * maxRadiusLimit;
+                    }
+                } else {
+                    angleX = baseAngleX - (me.clientX - startX) * 0.015;
+                    angleY = baseAngleY - (me.clientY - startY) * 0.015;
+                }
+                renderScene();
+            }
+            
+            function up() {
+                canvas.style.cursor = 'default';
+                window.removeEventListener('mousemove', move);
+                window.removeEventListener('mouseup', up);
+            }
+            
+            window.addEventListener('mousemove', move);
+            window.addEventListener('mouseup', up);
+        });
+
+        ctx.clearRect(0, 0, 400, 400);
+    </script>
+
+</body>
+</html>
