@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Х`Арийская арифметика — Интерактивный Учебник</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #0056b3; margin-bottom: 25px; }
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .tab-btn { padding: 10px 20px; font-size: 16px; border: 2px solid #0056b3; background: white; color: #0056b3; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-weight: bold; }
+        .tab-btn.active { background: #0056b3; color: white; }
+        .main-content { display: grid; grid-template-columns: 1.4fr 1.6fr; gap: 20px; }
+        .left-panel { background: #eef3f9; padding: 15px; border-radius: 6px; max-height: 520px; overflow-y: auto; }
+        .right-panel { background: #223143; color: white; padding: 20px; border-radius: 6px; display: flex; flex-direction: column; min-height: 580px; }
+        .system-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; background: transparent; }
+        .system-table th { background: #0056b3; color: white; padding: 12px 10px; font-size: 14px; text-align: center; border: 1px solid #004b9b; position: sticky; top: 0; border-radius: 4px; }
+        .clickable-cell { background: #ffffff; border: 2px solid #0056b3 !important; padding: 12px 8px; text-align: center; font-size: 15px; color: #0056b3; font-weight: bold; cursor: pointer; border-radius: 6px; box-shadow: 0 3px 6px rgba(0, 86, 179, 0.15); transition: all 0.15s ease; }
+        .clickable-cell:hover { background: #e6f0fa; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0, 86, 179, 0.25); }
+        .clickable-cell.selected-item { background: #0056b3 !important; color: white !important; }
+        .visualizer { flex: 1; position: relative; border: 2px solid #557295; border-radius: 4px; margin-top: 15px; overflow: hidden; background: #dcdcdc; min-height: 460px; user-select: none; }
+        #canvas3d { width: 100%; height: 100%; display: block; background: #dcdcdc; cursor: grab; }
+        #canvas3d:active { cursor: grabbing; }
+        .footer-action { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; color: black; font-size: 14px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Х`Арийская арифметика</h1>
+    <div class="tabs">
+        <button class="tab-btn active">Гармоническая</button>
+        <button class="tab-btn" onclick="alert('Сейчас мы настраиваем Гармоническую систему.')">Триадная</button>
+        <button class="tab-btn" onclick="alert('Сейчас мы настраиваем Гармоническую систему.')">Ровная</button>
+        <button class="tab-btn" onclick="alert('Сейчас мы настраиваем Гармоническую систему.')">Пирамидальная</button>
+        <button class="tab-btn" onclick="alert('Сейчас мы настраиваем Гармоническую систему.')">Призменная</button>
+    </div>
+    <div class="main-content">
+        <div class="left-panel">
+            <table class="system-table">
+                <thead>
+                    <tr>
+                        <th>Двухмерное умножение (два на ...)</th>
+                        <th>Трехмерное умножение (два жды ...)</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+        <div class="right-panel">
+            <h2 id="system-title" style="margin-top:0;">Гармоническая система умножения</h2>
+            <div class="visualizer"><canvas id="canvas3d" width="650" height="460"></canvas></div>
+        </div>
+    </div>
+    <div class="footer-action">
+        <span><b>Управление:</b> Зажмите мышь и тяните для вращения (ось инвертирована). Колесико — зум. Стрелки Вверх/Вниз на клавиатуре листают примеры.</span>
+    </div>
+</div>
+<script>
+    let canvas, ctx;
+    let selectedRowIndex = 0, isCurrentVolume = false;
+    
+    let angleX = -0.5, angleY = 0.6;
+    let scale3D = 1.0;
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    let currentPoints = [];
+
+    function init() {
+        canvas = document.getElementById('canvas3d');
+        ctx = canvas.getContext('2d');
+        buildTableAutomated();
+        setupMouseEvents();
+        updateSelection(0, false);
+        window.addEventListener('keydown', handleKeyboard);
+        window.addEventListener('resize', onWindowResize);
+        onWindowResize();
+    }
+
+    function buildTableAutomated() {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+        for (let i = 0; i <= 63; i++) {
+            let n = i + 2;
+            const tr = document.createElement('tr');
+            tr.id = `row-${i}`;
+            const valNa = 2 * n, valZhdy = 8 * n;
+            
+            const tdNa = document.createElement('td');
+            tdNa.id = `cell-na-${i}`;
+            tdNa.className = "clickable-cell";
+            tdNa.innerText = `2 · ${n} = ${valNa}`;
+            tdNa.onclick = function() { updateSelection(i, false); };
+
+            const tdZhdy = document.createElement('td');
+            tdZhdy.id = `cell-zhdy-${i}`;
+            tdZhdy.className = "clickable-cell";
+            tdZhdy.innerText = `2 × ${n} = ${valZhdy}`;
+            tdZhdy.onclick = function() { updateSelection(i, true); };
+
+            tr.appendChild(tdNa); tr.appendChild(tdZhdy); tbody.appendChild(tr);
+        }
+    }
+
+    function updateSelection(index, isVolume) {
+        selectedRowIndex = index; isCurrentVolume = isVolume;
+        
+        document.querySelectorAll('.clickable-cell').forEach(cell => cell.classList.remove('selected-item'));
+        
+        const targetCellId = isVolume ? `cell-zhdy-${index}` : `cell-na-${index}`;
+        const targetCell = document.getElementById(targetCellId);
+        if(targetCell) {
+            targetCell.classList.add('selected-item');
+            targetCell.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+        
+        generateGeometry(isVolume ? (8 * (index + 2)) : (2 * (index + 2)), isVolume);
+        renderScene();
+    }
+
+    function handleKeyboard(e) {
+        if (e.key === "ArrowDown" && selectedRowIndex < 63) { e.preventDefault(); updateSelection(selectedRowIndex + 1, isCurrentVolume); }
+        if (e.key === "ArrowUp" && selectedRowIndex > 0) { e.preventDefault(); updateSelection(selectedRowIndex - 1, isCurrentVolume); }
+    }
+
+    function generateGeometry(count, isVolume) {
+        currentPoints = [];
+        if (!isVolume) {
+            let cols = Math.ceil(Math.sqrt(count));
+            let step = 40;
+            for (let i = 0; i < count; i++) {
+                let r = i % cols;
+                let c = Math.floor(i / cols);
+                currentPoints.push({
+                    x: (r - (cols-1)/2) * step,
+                    y: 0,
+                    z: (c - (Math.ceil(count/cols)-1)/2) * step,
+                    isGold: false
+                });
+            }
+        } else {
+            let cubeGroups = count / 8, stepX = 75;
+            for (let g = 0; g < cubeGroups; g++) {
+                let offsetX = (g - (cubeGroups - 1) / 2) * stepX;
+                const baseOffsets = [
+                    [-20,-20,-20], [20,-20,-20], [-20,20,-20], [20,20,-20],
+                    [-20,-20,20],  [20,-20,20],  [-20,20,20],  [20,20,20]
+                ];
+                baseOffsets.forEach(pos => {
+                    currentPoints.push({
+                        x: pos[0] + offsetX,
+                        y: pos[1],
+                        z: pos[2],
+                        isGold: true
+                    });
+                });
+            }
+        }
+        let maxDist = 1;
+        currentPoints.forEach(p => {
+            let d = Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
+            if(d > maxDist) maxDist = d;
+        });
+        scale3D = (canvas.width * 0.32) / maxDist;
+    }
+
+    function renderScene() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let cx = canvas.width / 2, cy = canvas.height / 2;
+
+        let cosX = Math.cos(angleX), sinX = Math.sin(angleX);
+        let cosY = Math.cos(angleY), sinY = Math.sin(angleY);
+
+        let projected = currentPoints.map(p => {
+            let x1 = p.x * cosY - p.z * sinY;
+            let z1 = p.x * sinY + p.z * cosY;
+            let y2 = p.y * cosX - z1 * sinX;
+            let z2 = p.y * sinX + z1 * cosX;
+            return { x: cx + x1 * scale3D, y: cy - y2 * scale3D, z: z2, isGold: p.isGold };
+        });
+
+        projected.sort((a, b) => b.z - a.z);
+
+        projected.forEach(p => {
+            let radius = 14;
+            let grad = ctx.createRadialGradient(p.x - 4, p.y - 4, 1, p.x, p.y, radius);
+            ctx.shadowBlur = 6;
+            if (p.isGold) {
+                ctx.shadowColor = "rgba(255, 170, 0, 0.4)";
+                grad.addColorStop(0, '#fff3cc'); grad.addColorStop(0.3, '#ffbb00'); grad.addColorStop(1, '#805500');
+            } else {
+                ctx.shadowColor = "rgba(0, 168, 255, 0.4)";
+                grad.addColorStop(0, '#e6f7ff'); grad.addColorStop(0.3, '#00a8ff'); grad.addColorStop(1, '#004466');
+            }
+            ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = grad; ctx.fill(); ctx.closePath();
+        });
+    }
+
+    function setupMouseEvents() {
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let deltaX = e.clientX - previousMousePosition.x;
+            let deltaY = e.clientY - previousMousePosition.y;
+            
+            angleY -= deltaX * 0.01;
+            angleX -= deltaY * 0.01;
+            
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+            renderScene();
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            scale3D *= e.deltaY < 0 ? 1.1 : 0.9;
+            renderScene();
+        }, { passive: false });
+    }
+
+    function onWindowResize() {
+        const visualizer = canvas.parentElement;
+        canvas.width = visualizer.clientWidth || 650;
+        canvas.height = visualizer.clientHeight || 460;
+        if(currentPoints.length > 0) {
+            updateSelection(selectedRowIndex, isCurrentVolume);
+        }
+    }
+    window.onload = init;
+</script>
+</body>
+</html>
