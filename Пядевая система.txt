@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Х`Арийская арифметика — Пядевая Система</title>
+    <style>
+        /* Базовые настройки страницы */
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f0f4f8; 
+            margin: 0; 
+            padding: 10px; 
+            height: 100vh; 
+            box-sizing: border-box; 
+            overflow: hidden; 
+        }
+        
+        /* Главный контейнер на весь экран */
+        .container { 
+            max-width: 1400px; 
+            height: calc(100vh - 20px); 
+            margin: 0 auto; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        /* Верхняя шапка */
+        .top-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .top-header h1 {
+            color: #0056b3;
+            margin: 0;
+            font-size: 22px;
+            white-space: nowrap;
+            padding-left: 20px; 
+        }
+        
+        /* Кнопки переключения систем */
+        .tabs { 
+            display: flex; 
+            gap: 8px; 
+            margin: 0; 
+            margin-left: auto; 
+            flex-wrap: nowrap;
+        }
+        
+        .tab-btn { 
+            padding: 6px 14px; 
+            font-size: 14px; 
+            border: 2px solid #0056b3; 
+            background: white; 
+            color: #0056b3; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            font-weight: bold; 
+            white-space: nowrap;
+        }
+        .tab-btn.active { background: #0056b3; color: white; }
+        
+        /* Пропорции панелей */
+        .main-content { 
+            display: grid; 
+            grid-template-columns: 1.25fr 1.75fr; 
+            gap: 20px; 
+            flex: 1; 
+            min-height: 0; 
+        }
+        
+        /* Левая панель со своим скроллом */
+        .left-panel { 
+            background: #eef3f9; 
+            padding: 15px; 
+            border-radius: 6px; 
+            height: 100%; 
+            overflow-y: auto; 
+            box-sizing: border-box; 
+        }
+        
+        /* Правая панель */
+        .right-panel { 
+            background: #223143; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 6px; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            box-sizing: border-box; 
+        }
+        
+        /* Таблицы */
+        .system-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; background: transparent; table-layout: fixed; margin-bottom: 15px; }
+        .system-table th { background: #0056b3; color: white; padding: 6px 4px; font-size: 13px; text-align: center; border: 1px solid #004b9b; position: sticky; top: 0; border-radius: 4px; line-height: 1.2; z-index: 10; }
+        
+        .clickable-cell { background: #ffffff; border: 2px solid #0056b3 !important; padding: 6px 4px; text-align: center; font-size: 12px; color: #0056b3; font-weight: bold; cursor: pointer; border-radius: 6px; box-shadow: 0 2px 4px rgba(0, 86, 179, 0.1); transition: all 0.12s ease; white-space: nowrap; overflow: hidden; }
+        .clickable-cell:hover { background: #e6f0fa; transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0, 86, 179, 0.2); }
+        .clickable-cell.selected-item { background: #0056b3 !important; color: white !important; }
+        
+        /* Блок вычислений по книге */
+        .calc-box { background: #fff; padding: 12px; border-radius: 6px; border: 2px solid #557295; color: #333; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .calc-step-btn { background: #f0f4f8; border: 1px solid #0056b3; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin: 4px 0; width: 100%; text-align: left; font-size: 12px; transition: all 0.15s ease; color: #0056b3; }
+        .calc-step-btn:hover { background: #e6f0fa; }
+        .calc-step-btn.active-step { background: #d32f2f !important; color: white !important; border-color: #b71c1c !important; }
+
+        /* 3D Визуализатор */
+        .visualizer { 
+            flex: 1; 
+            position: relative; 
+            border: 2px solid #557295; 
+            border-radius: 4px; 
+            margin-top: 10px; 
+            overflow: hidden; 
+            background: #dcdcdc; 
+            user-select: none; 
+        }
+        #canvas3d { width: 100%; height: 100%; display: block; background: #dcdcdc; cursor: grab; }
+        #canvas3d:active { cursor: grabbing; }
+        .footer-action { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; color: black; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-header">
+        <h1>Х`Арийская арифметика</h1>
+        <div class="tabs">
+            <button class="tab-btn active">Пядевая</button>
+            <button class="tab-btn" onclick="alert('Переключение временно отключено на этапе изоляции.')">Гармоническая</button>
+            <button class="tab-btn" onclick="alert('Переключение временно отключено на этапе изоляции.')">Триадная</button>
+            <button class="tab-btn" onclick="alert('Переключение временно отключено на этапе изоляции.')">Ровная</button>
+            <button class="tab-btn" onclick="alert('Переключение временно отключено на этапе изоляции.')">Пирамидальная</button>
+            <button class="tab-btn" onclick="alert('Переключение временно отключено на этапе изоляции.')">Призменная</button>
+            <button class="tab-btn" style="border-color: #d32f2f; color: #d32f2f;" onclick="alert('Модуль Славянских часов подготавливается к загрузке.')">Славянские Часы</button>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="left-panel">
+            <table class="system-table">
+                <thead>
+                    <tr>
+                        <th style="width: 14%;">Знак</th>
+                        <th style="width: 32%;">Соответствие</th>
+                        <th style="width: 34%;">Величина</th>
+                        <th style="width: 20%;">Имя</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+
+            <div class="calc-box">
+                <h3 style="margin-top:0; color:#b71c1c; font-size:14px; border-bottom:1px solid #ccc; padding-bottom:4px;">Пример вычислений по книге</h3>
+                <div style="font-weight:bold; font-size:14px; text-align:center; margin:6px 0; font-family:'Times New Roman',serif;">
+                    P̄ - M̄ ⊥ ћ - C̄ + A⃗
+                </div>
+                <button id="step-0" class="calc-step-btn" onclick="runCalcStep(0)">1. Приведение к Пядях: 9ћ - 6ћ ⊥ 1ћ - 2ћ + 4ћ</button>
+                <button id="step-1" class="calc-step-btn" onclick="runCalcStep(1)">2. Первое действие: (3ћ ⊥ 1ћ) - 2ћ + 4ћ</button>
+                <button id="step-2" class="calc-step-btn" onclick="runCalcStep(2)">3. Триадное умножение (3ћ ⊥ 1ћ) = 5ћ</button>
+                <button id="step-3" class="calc-step-btn" onclick="runCalcStep(3)">4. Итог выражения: 5ћ - 2ћ + 4ћ = 7ћ ≡ Ō (Лоб)</button>
+            </div>
+        </div>
+        <div class="right-panel">
+            <h2 id="system-title" style="margin-top:0;">Пядевая система мер</h2>
+            <div class="visualizer">
+                <canvas id="canvas3d" width="650" height="460"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="footer-action">
+        <span><b>Управление:</b> Зажмите мышь и тяните для вращения. Колесико — зум. Стрелки Вверх/Вниз листают славянские меры.</span>
+    </div>
+</div>
+
+<script>
+    let canvas, ctx;
+    let selectedRowIndex = 0;
+    let isExampleMode = false;
+    
+    let angleX = -0.3, angleY = 0.4; 
+    let scale3D = 1.0;
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    let currentPoints = [];
+
+    const hPjad = 17.78; 
+    const pjadTableData = [
+        { sign: "ћ", match: "1 ћ", valText: "17,78 см", name: "Пядь", scaleType: "small", group: "Основные малые меры" },
+        { sign: "—", match: "1/2 ћ", valText: "8,89 см", name: "Полпяди", scaleType: "small", group: "Основные малые меры" },
+        { sign: "B̄", match: "1/4 ћ", valText: "4,445 см", name: "Вершок", scaleType: "small", group: "Основные малые меры" },
+        { sign: "N̄", match: "1/16 ћ", valText: "1,11125 см", name: "Ноготь", scaleType: "small", group: "Основные малые меры" },
+        { sign: "λ̄", match: "1/256 ћ", valText: "0,06945 см", name: "Линия", scaleType: "micro", group: "Основные малые меры" },
+        { sign: "V̄", match: "1/4096 ћ", valText: "~ 4 мкр", name: "Волос", scaleType: "micro", group: "Основные малые меры" },
+        { sign: "V̄̄", match: "1/16 V̄", valText: "~ 0,25 мкр", name: "Волосок", scaleType: "micro", group: "Основные малые меры" },
+        
+        { sign: "C̄", match: "2 ћ", valText: "35,56 см", name: "Стопа", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "λ⃗", match: "3 ћ", valText: "53,34 см", name: "Локоть", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "A⃗", match: "4 ћ", valText: "71,12 см", name: "Аршин", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "Ш̄", match: "5 ћ", valText: "88,90 см", name: "Шаг", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "M̄", match: "6 ћ", valText: "106,68 см", name: "Мера", scaleType: "medium", group: "Основные средние меры" },
+
+        { sign: "Ī", match: "8 ћ", valText: "142,24 см", name: "Столбец", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "П̄", match: "9 ћ", valText: "160,02 см", name: "Посох", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "S̄", match: "12 ћ", valText: "213,36 см", name: "Сажень", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "Ø̄", match: "16 ћ", valText: "284,48 см", name: "Круг", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "S⃗", match: "17 ћ", valText: "302,26 см", name: "Косая сажень", scaleType: "medium", group: "Основные средние меры" },
+        { sign: "S̄̄", match: "24 ћ", valText: "426,72 см", name: "Мерная сажень", scaleType: "medium", group: "Основные средние меры" },
+        
+        // ГРУППА 3: Основные большие меры
+        { sign: "B̄", match: "500 S̄ / 6 тыс ћ", valText: "1.066,8 м", name: "Верста", scaleType: "large", group: "Основные большие меры" },
+        { sign: "ξ̄", match: "1.517,41 ћ", valText: "1.517,41632 м", name: "Столбовая верста", scaleType: "large", group: "Основные большие меры" },
+        { sign: "B̄", match: "1.000 S̄", valText: "2.133,6 м", name: "Мерная верста", scaleType: "large", group: "Основные большие меры" },
+        { sign: "д̄", match: "150 ξ̄", valText: "227.612,448 м", name: "Даль", scaleType: "large", group: "Основные большие меры" },
+        { sign: "γ⃗", match: "Земля - Солнце", valText: "148.021.218,52 км", name: "Светлая даль", scaleType: "cosmic", group: "Основные большие меры" },
+        { sign: "ḡ", match: "д̄ · д̄ · T̄", valText: "518.074.264.845,5 км", name: "Дальняя даль", scaleType: "cosmic", group: "Основные большие меры" },
+        { sign: "T̄д̄", match: "Умноженная", valText: "2.276.124,48 км", name: "Темная даль", scaleType: "cosmic", group: "Основные большие меры" },
+        { sign: "λ⃗", match: "1670 д̄", valText: "380.112.788,16 км", name: "Большая лунная даль", scaleType: "cosmic", group: "Основные большие меры" }
+    ];
+
+    function init() {
+        canvas = document.getElementById('canvas3d');
+        ctx = canvas.getContext('2d');
+        buildTableAutomated();
+        setupMouseEvents();
+        updateSelection(0); 
+        window.addEventListener('keydown', handleKeyboard);
+        window.addEventListener('resize', onWindowResize);
+        onWindowResize();
+    }
+
+    function buildTableAutomated() {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+        
+        let currentGroup = "";
+        pjadTableData.forEach((m, i) => {
+            if (m.group !== currentGroup) {
+                currentGroup = m.group;
+                const trG = document.createElement('tr');
+                const thG = document.createElement('th');
+                thG.colSpan = 4;
+                thG.style.background = "#557295";
+                thG.style.fontSize = "11px";
+                thG.innerHTML = currentGroup;
+                trG.appendChild(thG);
+                tbody.appendChild(trG);
+            }
+
+            const tr = document.createElement('tr');
+            tr.id = `row-${i}`;
+            
+            const tdSign = document.createElement('td');
+            tdSign.className = "clickable-cell";
+            tdSign.id = `cell-sign-${i}`;
+            tdSign.innerHTML = `<span style="font-family: 'Times New Roman', serif; font-size: 14px; font-weight: bold; font-style: italic;">${m.sign}</span>`;
+            tdSign.onclick = function() { isExampleMode = false; updateSelection(i); };
+
+            const tdMatch = document.createElement('td');
+            tdMatch.className = "clickable-cell";
+            tdMatch.id = `cell-match-${i}`;
+            tdMatch.innerHTML = `<span style="font-family: 'Times New Roman', serif; font-size: 11px; font-style: italic;">${m.match}</span>`;
+            tdMatch.onclick = function() { updateSelection(i); };
+
+            const tdVal = document.createElement('td');
+            tdVal.className = "clickable-cell";
+            tdVal.id = `cell-val-${i}`;
+            tdVal.style.fontSize = "11px";
+            tdVal.innerHTML = m.valText;
+            tdVal.onclick = function() { updateSelection(i); };
+
+            const tdName = document.createElement('td');
+            tdName.className = "clickable-cell";
+            tdName.id = `cell-name-${i}`;
+            tdName.innerHTML = m.name;
+            tdName.onclick = function() { updateSelection(i); };
+
+            tr.appendChild(tdSign); tr.appendChild(tdMatch); tr.appendChild(tdVal); tr.appendChild(tdName);
+            tbody.appendChild(tr);
+        });
+    }
+
+    function updateSelection(index) {
+        if (!isExampleMode) {
+            selectedRowIndex = index;
+            document.querySelectorAll('.calc-step-btn').forEach(b => b.classList.remove('active-step'));
+            document.querySelectorAll('.clickable-cell').forEach(cell => cell.classList.remove('selected-item'));
+            
+            const c1 = document.getElementById(`cell-sign-${index}`);
+            const c2 = document.getElementById(`cell-match-${index}`);
+            const c3 = document.getElementById(`cell-val-${index}`);
+            const c4 = document.getElementById(`cell-name-${index}`);
+            if(c1) c1.classList.add('selected-item');
+            if(c2) c2.classList.add('selected-item');
+            if(c3) c3.classList.add('selected-item');
+            if(c4) c4.classList.add('selected-item');
+            
+            document.getElementById('system-title').innerHTML = `Пядевая система мер (${pjadTableData[index].group})`;
+            generateGeometry(pjadTableData[index].scaleType, false);
+        }
+        renderScene();
+    }
+
+    function handleKeyboard(e) {
+        if (!isExampleMode && e.key === "ArrowDown" && selectedRowIndex < pjadTableData.length - 1) { e.preventDefault(); updateSelection(selectedRowIndex + 1); }
+        if (!isExampleMode && e.key === "ArrowUp" && selectedRowIndex > 0) { e.preventDefault(); updateSelection(selectedRowIndex - 1); }
+    }
+
+    function runCalcStep(stepIndex) {
+        isExampleMode = true;
+        document.querySelectorAll('.clickable-cell').forEach(cell => cell.classList.remove('selected-item'));
+        document.querySelectorAll('.calc-step-btn').forEach(b => b.classList.remove('active-step'));
+        
+        document.getElementById(`step-${stepIndex}`).classList.add('active-step');
+        document.getElementById('system-title').innerHTML = `Арифметика по книге: Шаг №${stepIndex + 1}`;
+        
+        if (stepIndex === 0) {
+            generateGeometry("large", false);
+        } else if (stepIndex === 1) {
+            generateGeometry("small", false);
+        } else if (stepIndex === 2) {
+            generateGeometry("small", true); 
+        } else if (stepIndex === 3) {
+            generateGeometry("medium", false);
+        }
+        renderScene();
+    }
+
+    function generateGeometry(scaleType, isTriadForm) {
+        currentPoints = [];
+        let step = 30; 
+        
+        let ballCount = 8;
+        let isCosmicModel = false;
+        
+        if (scaleType === "micro") ballCount = 4;
+        else if (scaleType === "small") ballCount = 6;
+        else if (scaleType === "medium") ballCount = 12;
+        else if (scaleType === "large") ballCount = 20;
+        else if (scaleType === "cosmic") { ballCount = 30; isCosmicModel = true; }
+
+        if (!isTriadForm) {
+            if (!isCosmicModel) {
+                for (let i = 0; i <= ballCount; i++) {
+                    currentPoints.push({ x: i * step, y: 0, z: 0, isNode: i === 0 || i === ballCount, isGold: i === 0 || i === ballCount });
+                    if (i > 0 && i < ballCount && ballCount < 15) {
+                        currentPoints.push({ x: i * step, y: step * 0.35, z: 0, isNode: false, isGold: false });
+                        currentPoints.push({ x: i * step, y: -step * 0.35, z: 0, isNode: false, isGold: false });
+                    }
+                }
+            } else {
+                for (let i = 0; i < ballCount; i++) {
+                    let angle = (i * 2 * Math.PI) / ballCount;
+                    let radius = step * 3;
+                    currentPoints.push({ x: Math.cos(angle) * radius, y: 0, z: Math.sin(angle) * radius, isNode: i === 0, isGold: i === 0 });
+                }
+                currentPoints.push({ x: 0, y: 0, z: 0, isNode: true, isGold: true, isSun: true });
+            }
+        } else {
+            let hStep = step * Math.sqrt(2 / 3);
+            currentPoints.push({ x: 0, y: hStep, z: 0, isNode: true, isGold: true });
+            let r = step / Math.sqrt(3);
+            for (let a = 0; a < 3; a++) {
+                let angle = (a * 2 * Math.PI) / 3;
+                currentPoints.push({ x: Math.cos(angle) * r, y: 0, z: Math.sin(angle) * r, isNode: true, isGold: true });
+            }
+            currentPoints.push({ x: 0, y: -hStep, z: 0, isNode: true, isGold: true });
+        }
+
+        if (currentPoints.length > 0) {
+            let minX = currentPoints[0].x, maxX = currentPoints[0].x;
+            let minY = currentPoints[0].y, maxY = currentPoints[0].y;
+            let minZ = currentPoints[0].z, maxZ = currentPoints[0].z;
+            
+            currentPoints.forEach(p => {
+                if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+                if (p.z < minZ) minZ = p.z; if (p.z > maxZ) maxZ = p.z;
+            });
+            
+            let midX = (minX + maxX) / 2;
+            let midY = (minY + maxY) / 2;
+            let midZ = (minZ + maxZ) / 2;
+
+            currentPoints.forEach(p => {
+                p.x = p.x - midX;
+                p.y = p.y - midY;
+                p.z = p.z - midZ;
+            });
+        }
+
+let maxDist = 1;
+currentPoints.forEach(p => {
+            let d = Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
+function renderScene() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let cx = canvas.width / 2, cy = canvas.height / 2;
+
+        let cosX = Math.cos(angleX), sinX = Math.sin(angleX);
+        let cosY = Math.cos(angleY), sinY = Math.sin(angleY);
+
+        let projected = currentPoints.map(p => {
+            let x1 = p.x * cosY - p.z * sinY;
+            let z1 = p.x * sinY + p.z * cosY;
+            let y2 = p.y * cosX - z1 * sinX;
+            let z2 = p.y * sinX + z1 * cosX;
+            return { x: cx + x1 * scale3D, y: cy - y2 * scale3D, z: z2, isGold: p.isGold, isNode: p.isNode, isSun: p.isSun };
+        });
+
+            projected.sort((a, b) => a.z - b.z);
+
+            projected.forEach(p => {
+                    let radius = (p.isNode ? 13 : 8) * scale3D;
+                    if (p.isSun) radius = 22 * scale3D;
+            
+                    let grad = ctx.createRadialGradient(p.x - radius * 0.1, p.y - radius * 0.1, 1, p.x, p.y, radius);
+            ctx.shadowBlur = 0; 
+            
+            if (p.isSun) {
+                grad.addColorStop(0, '#ffff00'); grad.addColorStop(0.4, '#ff3d00'); grad.addColorStop(1, '#dd2c00');
+            } else if (p.isGold) {
+                grad.addColorStop(0, '#fff3cc'); grad.addColorStop(0.3, '#ffbb00'); grad.addColorStop(1, '#805500');
+            } else {
+                grad.addColorStop(0, '#e8f5e9'); grad.addColorStop(0.3, '#4caf50'); grad.addColorStop(1, '#1b5e20');
+            }
+            
+            ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = grad; ctx.fill(); ctx.closePath();
+        });
+    }
+
+    function setupMouseEvents() {
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let deltaX = e.clientX - previousMousePosition.x;
+            let deltaY = e.clientY - previousMousePosition.y;
+            angleY += deltaX * 0.01;
+            angleX += deltaY * 0.01; 
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+            renderScene();
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            scale3D *= e.deltaY < 0 ? 1.1 : 0.9;
+            renderScene();
+        }, { passive: false });
+    }
+
+    function onWindowResize() {
+        const visualizer = canvas.parentElement;
+        canvas.width = visualizer.clientWidth || 650;
+        canvas.height = visualizer.clientHeight || 460;
+        if(currentPoints.length > 0) {
+            updateSelection(selectedRowIndex);
+        }
+    }
+    window.onload = init;
+</script>
+</body>
+</html>
