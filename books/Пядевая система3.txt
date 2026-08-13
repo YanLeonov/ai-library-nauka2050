@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>х`Арийская арифметика - Личные меры</title>
+ <style>
+ * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+ body { background-color: #f7f9fa; color: #2c3e50; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+ .top-navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background-color: #fff; border-bottom: 1px solid #ccc; }
+ .system-title { font-size: 16px; font-weight: bold; color: #1e5a99; }
+ .nav-tabs { display: flex; gap: 8px; }
+ .tab-btn { background-color: #fff; border: 1px solid #1e5a99; color: #1e5a99; padding: 5px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+ .tab-btn.active { background-color: #1e5a99; color: #fff; }
+
+ .workspace { display: flex; flex: 1; overflow: hidden; padding: 15px; gap: 15px; }
+ .left-panel { width: 45%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+ .right-panel { width: 55%; border: 2px solid #3498db; border-radius: 8px; display: flex; flex-direction: column; position: relative; background-color: #fff; overflow: hidden; }
+ 
+ .info-card { background: #fff; border-radius: 8px; border: 2px solid #3498db; padding: 15px; }
+ .info-card h2 { font-size: 15px; margin-bottom: 10px; color: #2980b9; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+ 
+ .table-wrapper { overflow-x: auto; margin-top: 5px; }
+ table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+ th { background-color: #3498db; color: white; padding: 8px 10px; }
+ td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; }
+ tr.clickable-row { cursor: pointer; }
+ tr.clickable-row:hover { background-color: #ecf0f1; }
+ tr.active-row { background-color: #d6eaf8 !important; font-weight: 600; }
+
+ .calc-box { background: #fffcf3; border: 2px dashed #f39c12; border-radius: 8px; padding: 15px; }
+ .calc-title { font-weight: bold; color: #e67e22; margin-bottom: 12px; font-size: 14px; }
+ .calc-steps { display: flex; flex-direction: column; gap: 10px; }
+ .step-btn { background: white; border: 1px solid #ddd; padding: 12px; border-radius: 6px; text-align: left; cursor: pointer; font-size: 13px; line-height: 1.5; width: 100%; }
+ .step-btn:hover { background: #fef5e7; }
+ .step-btn.active-step { background: #f39c12; color: white; font-weight: bold; border-color: #f39c12; }
+ .math-display { font-family: monospace; background: rgba(0,0,0,0.05); padding: 6px 10px; border-radius: 4px; display: inline-block; margin-top: 6px; font-weight: bold; color: #27ae60; font-size: 12px; width: 100%; line-height: 1.4; }
+ .step-btn.active-step .math-display { background: rgba(255,255,255,0.2); color: #fff; }
+
+ #canvas-container { flex: 1; width: 100%; height: 100%; position: relative; }
+ canvas { display: block; width: 100%; height: 100%; }
+ 
+ .measure-badge { position: absolute; background: rgba(255,255,255,0.95); border: 2px solid #3498db; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); z-index: 10; pointer-events: none; text-align: center; transition: all 0.2s; }
+ .measure-badge.pos-bottom-right { bottom: 15px; right: 15px; left: auto; transform: none; }
+ .measure-badge.pos-bottom-center { bottom: 15px; left: 50%; right: auto; transform: translateX(-65%); }
+ 
+ .coords-debug { position: absolute; bottom: 15px; left: 15px; background: rgba(44, 62, 80, 0.9); color: #fff; font-size: 11px; padding: 4px 10px; border-radius: 4px; }
+ </style>
+</head>
+<body>
+<div class="top-navbar">
+ <div class="system-title">х`Арийская арифметика</div>
+ <div class="nav-tabs">
+ <button class="tab-btn active">Пядевая</button>
+ <button class="tab-btn">Гармоническая</button>
+ <button class="tab-btn">Триадная</button>
+ <button class="tab-btn">Ровная</button>
+ <button class="tab-btn">Пирамидальная</button>
+ </div>
+</div>
+<div class="workspace">
+ <div class="left-panel">
+ 
+ <div class="info-card calc-box">
+ <div class="calc-title">Подсчёт уравнения по вашим физическим замерам тела</div>
+ <div class="calc-steps">
+ <button class="step-btn" id="step-1" onclick="setStep(1)">
+ <strong>Шаг 1. Разность базовой оси:</strong><br>
+ <div class="math-display">(посох) 140.0 см − (мера) 93.0 см = 46.5 см (Разностный Локоть)</div>
+ </button>
+ <button class="step-btn" id="step-2" onclick="setStep(2)">
+ <strong>Шаг 2. Разность мер и вашей Стопы:</strong><br>
+ <div class="math-display">(локоть канона) 46.5 см + (пядь малая) 15.5 см − (стопа) 27.0 см = 35.0 см (Длина без Аршина)</div>
+ </button>
+ <button class="step-btn" id="step-3" onclick="setStep(3)">
+ <strong>Шаг 3. Гармоническое сопряжение:</strong><br>
+ <div class="math-display">(длина без аршина) 35.0 см + (стопа) 27.0 см = 62.0 см (Расчётный Аршин)</div>
+ </button>
+ <button class="step-btn" id="step-4" onclick="setStep(4)">
+ <strong>Шаг 4. Финальный результат уравнения:</strong><br>
+ <div class="math-display">Итог: (расчётный аршин) 62.0 см + (локоть канона) 46.5 см = 108.5 см (Ваш Лоб)</div>
+ </button>
+ </div>
+ </div>
+
+ <div class="info-card">
+ <h2>Основные малые меры (Проекция на Кисть)</h2>
+ <div class="table-wrapper"><table><thead><tr><th>Знак</th><th>Соответств.</th><th>Величина</th><th>Имя</th></tr></thead><tbody id="small-table"></tbody></table></div>
+ </div>
+ <div class="info-card">
+ <h2>Основные средние меры (Проекция на Тело)</h2>
+ <div class="table-wrapper"><table><thead><tr><th>Знак</th><th>Соответств.</th><th>Величина</th><th>Имя</th></tr></thead><tbody id="medium-table"></tbody></table></div>
+ </div>
+ <div class="info-card">
+ <h2>Древнеславянские части тела (Проекция Боди-2)</h2>
+ <div class="table-wrapper"><table><thead><tr><th>Обозначение</th><th>Анатомическая область</th></tr></thead><tbody id="body2-table"></tbody></table></div>
+ </div>
+ </div>
+
+ <div class="right-panel">
+ <div id="canvas-container">
+ <div class="measure-badge pos-bottom-center" id="hud-label">Выберите шаг вычислений</div>
+ <div class="coords-debug" id="debug-coords">Кликните для калибровки</div>
+ <canvas id="paintCanvas"></canvas>
+ </div>
+ </div>
+</div>
+<script>
+const imgHandSrc = "hand.jpg";
+const imgBodySrc = "body.jpg";
+const imgBody2Src = "body2.jpg";
+
+const imgHand = new Image(); imgHand.src = imgHandSrc;
+const imgBody = new Image(); imgBody.src = imgBodySrc;
+const imgBody2 = new Image(); imgBody2.src = imgBody2Src;
+
+const measures = {
+ small: [
+ { id: "volosok", sign: "Вл", соотв: "1/144 ћ", val: "~ 1,07 мм", name: "Волосок", file: "hand", lines: [{x1: 45, y1: 15, x2: 45, y2: 18}] },
+ { id: "nogot", sign: "Нг", соотв: "1/16 ћ", val: "0,96 см", name: "Ноготь", file: "hand", lines: [{x1: 73.9, y1: 25.3, x2: 76.0, y2: 28.0}] },
+ { id: "vershok_k", sign: "Врк", соотв: "1/4 ћ", val: "3,87 см", name: "Казённый вершок", file: "hand", lines: [{x1: 77.0, y1: 42.6, x2: 80.2, y2: 29.3}] },
+ { id: "vershok_n", sign: "Врн", соотв: "1/4 ћ", val: "3,87 см", name: "Народный вершок", file: "hand", lines: [{x1: 77.5, y1: 72.9, x2: 81.6, y2: 72.0}] },
+ { id: "pyad_m", sign: "ћ", соотв: "1 ћ", val: "15,50 см", name: "Пядь малая (Ваш замер)", file: "hand", lines: [{x1: 11.0, y1: 73.8, x2: 31.6, y2: 72.3}] },
+ { id: "pyad_k", sign: "ћк", соотв: "1,25 ћ", val: "19,37 см", name: "Пядь с кувырком", file: "hand", lines: [{x1: 10.0, y1: 15.6, x2: 37.6, y2: 12.9}] },
+ { id: "pyad_b", sign: "ћб", соотв: "1,5 ћ", val: "23,25 см", name: "Пядь большая", file: "hand", lines: [{x1: 61.0, y1: 6.8, x2: 89.3, y2: 23.8}] },
+ { id: "kuvyrok", sign: "Кв", соотв: "1/4 ћ", val: "3,87 см", name: "Кувырок", file: "hand", lines: [{x1: 31.6, y1: 72.3, x2: 38.7, y2: 70.7}] }
+ ],
+ medium: [
+ { id: "stopa", sign: "CŊ", соотв: "1.74 ћ", val: "27,00 см", name: "Стопа (Ваш замер)", file: "body", lines: [{x1: 32.7, y1: 90.7, x2: 45.2, y2: 91.2}] },
+ { id: "lokot", sign: "Лк", соотв: "3.26 ћ", val: "50,50 см", name: "Локоть (Ваш замер)", file: "body", lines: [{ x1: 13.9, y1: 30.9, x2: 32.3, y2: 30.4 }, { x1: 20.2, y1: 71.7, x2: 20.2, y2: 51.5 }, { x1: 30.5, y1: 71.7, x2: 30.5, y2: 51.5 }]},
+ { id: "arshin", sign: "A", соотв: "4 ћ", val: "62,00 см", name: "Аршин", file: "body", lines: [{x1: 13.9, y1: 11.2, x2: 41.8, y2: 11.3}] },
+ { id: "shag", sign: "Шг", соотв: "5 ћ", val: "65,00 см", name: "Шаг (Ваш замер)", file: "body", lines: [{x1: 52.5, y1: 88.8, x2: 44.7, y2: 86.7}] },
+ { id: "mera", sign: "MŊ", соотв: "6 ћ", val: "93,00 см", name: "Мера", file: "body", lines: [{x1: 50.3, y1: 90.3, x2: 49.1, y2: 37.9}] },
+ { id: "lob", sign: "Ō", соотв: "7 ћ", val: "108,50 см", name: "Лоб", file: "body", lines: [{x1: 50.3, y1: 90.3, x2: 49.5, y2: 16.0}] },
+ { id: "posoh", sign: "PŊ", соотв: "9 ћ", val: "140,00 см", name: "Посох (До подмышки)", file: "body", lines: [{x1: 57.6, y1: 35.8, x2: 58.3, y2: 90.2}] },
+ { id: "sazhen", sign: "Сж", соотв: "12 ћ", val: "185,00 см", name: "Сажень маховая (Ваш Рост)", file: "body", lines: [{x1: 13.9, y1: 37.9, x2: 84.2, y2: 38.2}] },
+ { id: "kosaya", sign: "Кс", соотв: "14 ћ", val: "217,00 см", name: "Косая сажень", file: "body", lines: [{x1: 32.3, y1: 86.6, x2: 78.1, y2: 12.7}] }
+ ],
+ body2: [
+ { id: "b2_lob", sign: "Лоб", name: "Лоб (Верхняя часть головы)", file: "body2", lines: [{x1: 47.8, y1: 8.6, x2: 57.0, y2: 8.6}] },
+ { id: "b2_chelo", sign: "Чело", name: "Чело (Лобная область)", file: "body2", lines: [{x1: 45.8, y1: 22.4, x2: 57.0, y2: 21.1}] },
+ { id: "b2_vezhdy", sign: "Вежды", name: "Вежды (Веки)", file: "body2", lines: [{x1: 54.8, y1: 25.9, x2: 58.3, y2: 24.9}] },
+ { id: "b2_oko", sign: "Око", name: "Око (Глаз)", file: "body2", lines: [{x1: 53.9, y1: 28.8, x2: 58.7, y2: 28.1}] },
+ { id: "b2_lanita", sign: "Ланита", name: "Ланита (Щека)", file: "body2", lines: [{x1: 58.1, y1: 33.1, x2: 56.5, y2: 36.7}] },
+ { id: "b2_usta", sign: "Уста", name: "Уста (Рот)", file: "body2", lines: [{x1: 49.6, y1: 38.5, x2: 53.9, y2: 38.3}] },
+ { id: "b2_perst", sign: "Перст", name: "Перст (Палец руки)", file: "body2", lines: [{x1: 22.4, y1: 29.7, x2: 22.4, y2: 41.0}] },
+ { id: "b2_dlan", sign: "Длань", name: "Длань (Ладонь кисти)", file: "body2", lines: [{x1: 19.1, y1: 46.9, x2: 26.8, y2: 45.4}] },
+ { id: "b2_vyya", sign: "Выя", name: "Выя (Шея)", file: "body2", lines: [{x1: 45.6, y1: 40.8, x2: 46.0, y2: 49.0}, {x1: 57.6, y1: 40.8, x2: 57.7, y2: 48.5}]},
+ { id: "b2_ramena", sign: "Рамена", name: "Рамена (Плечи)", file: "body2", lines: [{x1: 34.2, y1: 52.4, x2: 45.8, y2: 49.4}, {x1: 57.7, y1: 49.4, x2: 69.4, y2: 52.2}]},
+ { id: "b2_desnica", sign: "Десница", name: "Десница (Правая рука)", file: "body2", lines: [{x1: 24.9, y1: 29.9, x2: 26.8, y2: 89.8}, {x1: 26.8, y2: 89.8, x2: 36.0, y2: 56.7}]},
+ { id: "b2_shuyca", sign: "Шуйца", name: "Шуйца (Левая рука)", file: "body2", lines: [{x1: 67.3, y1: 53.7, x2: 71.9, y2: 88.4}, {x1: 71.9, y1: 88.4, x2: 96.4, y2: 88.9}]}
+ ]
+};
+</script>
+<script>
+function buildTables() {
+ const sTable = document.getElementById('small-table');
+ const mTable = document.getElementById('medium-table');
+ const b2Table = document.getElementById('body2-table');
+ sTable.innerHTML = ""; mTable.innerHTML = ""; b2Table.innerHTML = "";
+
+ measures.small.forEach(m => {
+ const tr = document.createElement('tr'); tr.className = 'clickable-row'; tr.id = `m-${m.id}`;
+ tr.innerHTML = `<td><strong>${m.sign}</strong></td><td>${m.соотв}</td><td>${m.val}</td><td>${m.name}</td>`;
+ tr.onclick = () => selectMeasure(m); sTable.appendChild(tr);
+ });
+
+ measures.medium.forEach(m => {
+ const tr = document.createElement('tr'); tr.className = 'clickable-row'; tr.id = `m-${m.id}`;
+ tr.innerHTML = `<td><strong>${m.sign}</strong></td><td>${m.соотв}</td><td>${m.val}</td><td>${m.name}</td>`;
+ tr.onclick = () => selectMeasure(m); mTable.appendChild(tr);
+ });
+
+ measures.body2.forEach(m => {
+ const tr = document.createElement('tr'); tr.className = 'clickable-row'; tr.id = `m-${m.id}`;
+ tr.innerHTML = `<td><strong>${m.sign}</strong></td><td>${m.name}</td>`;
+ tr.onclick = () => selectMeasure(m); b2Table.appendChild(tr);
+ });
+}
+
+const canvas = document.getElementById('paintCanvas');
+const ctx = canvas.getContext('2d');
+let activeImgType = "body";
+let activeMeasure = null;
+let activeStep = 1;
+let pulseValue = 1.0;
+let pulseDir = -0.03;
+
+function selectMeasure(m) {
+ activeStep = null; activeMeasure = m; activeImgType = m.file;
+ document.querySelectorAll('.clickable-row').forEach(r => r.classList.remove('active-row'));
+ document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active-step'));
+ const el = document.getElementById(`m-${m.id}`); if (el) el.classList.add('active-row');
+ 
+ const badge = document.getElementById('hud-label');
+ badge.className = "measure-badge pos-bottom-right";
+ badge.innerText = m.name;
+}
+
+function setStep(stepNum) {
+ activeMeasure = null; activeStep = stepNum; activeImgType = "body";
+ document.querySelectorAll('.clickable-row').forEach(r => r.classList.remove('active-row'));
+ document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active-step'));
+ document.getElementById(`step-${stepNum}`).classList.add('active-step');
+ 
+ const badge = document.getElementById('hud-label');
+ badge.className = "measure-badge pos-bottom-center";
+ 
+ const txt = ["Шаг 1: Посох и Мера", "Шаг 2: Учёт Стопы", "Шаг 3: Сопряжение", "Шаг 4: Итог (Ваш Лоб)"];
+ badge.innerText = txt[stepNum - 1];
+}
+
+function getImgLayout() {
+ let img = imgHand; if (activeImgType === "body") img = imgBody; if (activeImgType === "body2") img = imgBody2;
+ if (!img.complete || img.naturalWidth === 0) return null;
+ const cw = canvas.width, ch = canvas.height, iw = img.naturalWidth, ih = img.naturalHeight;
+ const ratio = Math.min(cw / iw, ch / ih);
+ return { x: (cw - iw * ratio) / 2, y: (ch - ih * ratio) / 2, width: iw * ratio, height: ih * ratio };
+}
+
+function resizeCanvas() {
+ const container = document.getElementById('canvas-container');
+ if (canvas.width !== container.clientWidth || canvas.height !== container.clientHeight) {
+ canvas.width = container.clientWidth; canvas.height = container.clientHeight;
+ }
+}
+
+canvas.addEventListener('mousedown', function(e) {
+ const layout = getImgLayout(); if (!layout) return;
+ const rect = canvas.getBoundingClientRect();
+ const pctX = ((e.clientX - rect.left - layout.x) / layout.width) * 100;
+ const pctY = ((e.clientY - rect.top - layout.y) / layout.height) * 100;
+ if (pctX >= 0 && pctX <= 100 && pctY >= 0 && pctY <= 100) {
+ document.getElementById('debug-coords').innerText = `x: ${pctX.toFixed(1)}, y: ${pctY.toFixed(1)}`;
+ }
+});
+
+function drawPulseLine(layout, x1Pct, y1Pct, x2Pct, y2Pct, text) {
+ const x1 = layout.x + (x1Pct / 100) * layout.width;
+ const y1 = layout.y + (y1Pct / 100) * layout.height;
+ const x2 = layout.x + (x2Pct / 100) * layout.width;
+ const y2 = layout.y + (y2Pct / 100) * layout.height;
+ 
+ ctx.save();
+ ctx.strokeStyle = `rgba(231, 76, 60, ${pulseValue})`;
+ ctx.lineWidth = 4; ctx.lineCap = "round";
+ ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+ 
+ if (text) {
+ ctx.fillStyle = "#2c3e50"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center";
+ ctx.fillText(text, (x1 + x2) / 2, ((y1 + y2) / 2) - 12);
+ }
+ ctx.restore();
+}
+
+function render() {
+ resizeCanvas(); ctx.clearRect(0, 0, canvas.width, canvas.height);
+ pulseValue += pulseDir; if (pulseValue <= 0.2 || pulseValue >= 1.0) pulseDir = -pulseDir;
+ 
+ const layout = getImgLayout();
+ if (layout) {
+ let img = imgHand; if (activeImgType === "body") img = imgBody; if (activeImgType === "body2") img = imgBody2;
+ ctx.drawImage(img, layout.x, layout.y, layout.width, layout.height);
+ 
+ if (activeMeasure && activeMeasure.lines) {
+ activeMeasure.lines.forEach((line, index) => {
+ drawPulseLine(layout, line.x1, line.y1, line.x2, line.y2, index === 0 ? activeMeasure.sign : "");
+ });
+ }
+ 
+ if (activeStep) {
+ if (activeStep === 1) {
+ const p = measures.medium.find(m => m.id === "posoh");
+ const m = measures.medium.find(m => m.id === "mera");
+ if (p && p.lines) drawPulseLine(layout, p.lines.x1, p.lines.y1, p.lines.x2, p.lines.y2, "Посох");
+ if (m && m.lines) drawPulseLine(layout, m.lines.x1, m.lines.y1, m.lines.x2, m.lines.y2, "Мера");
+ }
+ if (activeStep === 2) {
+ const l = measures.medium.find(m => m.id === "lokot");
+ if (l && l.lines) l.lines.forEach(line => drawPulseLine(layout, line.x1, line.y1, line.x2, line.y2, "Локоть канона"));
+ }
+ if (activeStep === 3) {
+ const s = measures.medium.find(m => m.id === "stopa");
+ if (s && s.lines) {
+ s.lines.forEach(line => drawPulseLine(layout, line.x1, line.y1, line.x2, line.y2, "Стопа"));
+ }
+ }
+ if (activeStep === 4) {
+ const lob = measures.medium.find(m => m.id === "lob");
+ if (lob && lob.lines) drawPulseLine(layout, lob.lines.x1, lob.lines.y1, lob.lines.x2, lob.lines.y2, "ИТОГ: Ваш Лоб");
+ }
+ }
+ }
+ requestAnimationFrame(render);
+}
+
+window.onload = () => { buildTables(); setStep(1); render(); };
+</script>
+</body>
+</html>
