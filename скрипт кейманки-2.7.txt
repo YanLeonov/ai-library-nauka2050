@@ -1,0 +1,83 @@
+// ==UserScript==
+// @name         AI Chat to Local Saver (Protected Content)
+// @namespace    http://tampermonkey.net
+// @version      2.7
+// @description  Захват всего текста страницы с защитой от удаления полезных слов
+// @author       Твой ИИ-Помощник
+// @match        *://*/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    function exportChat() {
+        let fullPageText = document.body.innerText || "";
+        let textResult = "=== ТОЧНЫЙ ЛОГ ДИАЛОГА (ОЧИЩЕННЫЙ) ===\n\n";
+
+        const lines = fullPageText.split('\n');
+        let lastLine = "";
+
+        lines.forEach((line) => {
+            let cleanLine = line.trim();
+
+            if (cleanLine.length > 0 && cleanLine !== lastLine) {
+
+                // Проверяем: это короткий пункт меню или полноценное предложение?
+                const isShortMenu = cleanLine.length < 35;
+
+                // Стираем строку, ТОЛЬКО если это короткая надпись из интерфейса Google
+                if (isShortMenu && (
+                    cleanLine.includes("Режим ИИ") ||
+                    cleanLine.includes("Картинки") ||
+                    cleanLine.includes("Новости") ||
+                    cleanLine.includes("Покупки") ||
+                    cleanLine.includes("Видео") ||
+                    cleanLine.includes("Ещё") ||
+                    cleanLine.includes("Посмотреть историю") ||
+                    cleanLine.includes("Настроить общедоступные ссылки") ||
+                    cleanLine.includes("Сохранить в Загрузки")
+                )) {
+                    return; // Пропускаем этот мусор меню
+                }
+
+                // Защита от системных строк самого скрипта
+                if (cleanLine.includes("=== ") || cleanLine.includes("exportChat")) {
+                    return;
+                }
+
+                // Если строка прошла проверки — сохраняем её
+                textResult += cleanLine + "\n";
+                lastLine = cleanLine;
+            }
+        });
+
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+        // Твоё фирменное имя файла
+        const filename = `ChatAIYanLeonov_chat_${timestamp}.txt`;
+
+        const blob = new Blob([textResult], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    function createSaveButton() {
+        if (document.getElementById('ai-saver-btn')) return;
+        const btn = document.createElement('button');
+        btn.id = 'ai-saver-btn';
+        btn.innerText = '💾 Сохранить в Загрузки';
+        btn.style = 'position:fixed; bottom:20px; right:20px; z-index:99999; padding:10px 15px; background-color:#2ea44f; color:white; border:none; border-radius:6px; cursor:pointer; font-family:sans-serif; font-size:14px; box-shadow:0 4px 12px rgba(0,0,0,0.15); font-weight:bold;';
+        btn.onclick = exportChat;
+        document.body.appendChild(btn);
+    }
+
+    setTimeout(createSaveButton, 2000);
+    setInterval(createSaveButton, 5000);
+})();
+
+
